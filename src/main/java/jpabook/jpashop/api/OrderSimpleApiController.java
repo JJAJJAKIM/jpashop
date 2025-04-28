@@ -5,8 +5,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
-import jpabook.jpashop.service.OrderService;
-import lombok.AllArgsConstructor;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepositoty;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepositoty orderSimpleQueryRepositoty;
 
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1() {
@@ -59,21 +60,26 @@ public class OrderSimpleApiController {
         return result;
     }
 
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> orderV4() {
+        return orderSimpleQueryRepositoty.findOrderDtos();
+    }
+
     @Data
     static class SimpleOrderDto {
-        private Long orderId;
+        private Long id;
         private String name;
         private LocalDateTime orderDate;
         private OrderStatus orderStatus;
         private Address address;
 
         public SimpleOrderDto(Order order) {
-            orderId = order.getId();
-            name = order.getMember().getName(); //LAZY 초기화... 영속성 컨텍스트를 먼저 찾아보고 null이면 DB에서 Select 해온다.
+            id = order.getId();
+            name = order.getMember().getName();
             orderDate = order.getOrderDate();
             orderStatus = order.getStatus();
             address = order.getDelivery().getAddress();
-
         }
     }
+
 }
